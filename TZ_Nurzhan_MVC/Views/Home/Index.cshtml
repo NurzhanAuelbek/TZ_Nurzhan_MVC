@@ -1,0 +1,57 @@
+﻿@model List<Dictionary<string, object>>
+
+<form id="myForm">
+    <select id="citySelect">
+        @foreach (var city in Model)
+        {
+            <option value="@city["ID"]">@city["Name"]</option>
+        }
+    </select>
+    <select id="workshopSelect"></select>
+    <select id="employeeSelect"></select>
+    <select id="teamSelect"></select>
+    <select id="shiftSelect"></select>
+    <input type="submit" value="Сохранить">
+</form>
+
+<script>
+    function populateDropdown(dropdownId, fetchUrl, params, keyField, valueField) {
+        fetch(fetchUrl + params)
+            .then(response => response.json())
+            .then(data => {
+                var select = document.getElementById(dropdownId);
+                select.innerHTML = '';
+                for (var item of data) {
+                    var option = document.createElement('option');
+                    option.value = item[keyField];
+                    option.text = item[valueField];
+                    select.appendChild(option);
+                }
+            });
+    }
+
+    window.onload = function () {
+        populateDropdown('teamSelect', '/Home/GetTeams', '', 'ID', 'Name');
+        populateDropdown('shiftSelect', '/Home/GetShifts', '', 'ID', 'Name');
+    };
+
+    document.getElementById('citySelect').addEventListener('change', function () {
+        populateDropdown('workshopSelect', '/Home/GetWorkshops?cityId=', this.value, 'ID', 'Name');
+    });
+
+    document.getElementById('workshopSelect').addEventListener('change', function () {
+        populateDropdown('employeeSelect', '/Home/GetEmployees?workshopId=', this.value, 'ID', 'Name');
+    });
+
+    document.getElementById('myForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = {
+            cityId: document.getElementById('citySelect').value,
+            workshopId: document.getElementById('workshopSelect').value,
+            employeeId: document.getElementById('employeeSelect').value,
+            teamId: document.getElementById('teamSelect').value,
+            shiftId: document.getElementById('shiftSelect').value,
+        };
+        document.cookie = 'formData=' + JSON.stringify(formData);
+    });
+</script>
